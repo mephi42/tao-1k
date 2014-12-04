@@ -13,7 +13,8 @@ class Context {
 public:
 	Context(int argc, char** argv) : stopped(false) {
 		orb = CORBA::ORB_init(argc, argv, "tao-1k");
-		CORBA::Object_var namingContextObject = orb->resolve_initial_references("NameService");
+		CORBA::Object_var namingContextObject =
+			orb->resolve_initial_references("NameService");
 		namingContext = CosNaming::NamingContext::_narrow(namingContextObject);
 		name.length(1);
 		name[0].id = CORBA::string_dup("tao-1k");
@@ -27,12 +28,12 @@ public:
 
 	void run() {
 		while (true) {
-			{
+			do {
 				std::unique_lock<std::mutex> g(mutex);
 				if (stopped) {
 					break;
 				}
-			}
+			} while (false);
 
 			try {
 				namingContext->resolve(name);
@@ -79,7 +80,7 @@ int main(int argc, char** argv) {
 	int nThreads = 1000;
 	try {
 		Context context(argc, argv);
-	std::cerr << "nThreads = " << nThreads << std::endl;
+		std::cerr << "nThreads = " << nThreads << std::endl;
 		std::vector<std::unique_ptr<std::thread>> threads;
 		threads.reserve(nThreads);
 		auto run = std::bind(&Context::run, std::ref(context));
